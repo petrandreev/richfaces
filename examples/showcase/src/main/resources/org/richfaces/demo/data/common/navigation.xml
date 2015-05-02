@@ -594,6 +594,10 @@
                         <name>Table ContextMenu</name>
                     </sample>
                     <sample>
+                        <id>dynamic-client</id>
+                        <name>Dynamic Client ContextMenu</name>
+                    </sample>
+                    <sample>
                         <id>tree</id>
                         <name>Tree ContextMenu</name>
                     </sample>

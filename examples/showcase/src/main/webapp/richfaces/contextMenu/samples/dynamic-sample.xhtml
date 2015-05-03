@@ -11,7 +11,7 @@
                 <a4j:ajax execute="@form" event="selectionchange" listener="#{extTableSelectionBean.selectionListener}"
                     render="contextMenu"
                     onbeforesubmit="if(event.type==#{rich:component('contextMenu')}.options.showEvent){RichFaces.ui.originalEvent=event;}"
-                    oncomplete="if(RichFaces.ui.originalEvent){#{rich:component('contextMenu')}.show(RichFaces.ui.originalEvent); RichFaces.ui.originalEvent=null;}"/>/>
+                    oncomplete="if(RichFaces.ui.originalEvent){#{rich:component('contextMenu')}.show(RichFaces.ui.originalEvent); RichFaces.ui.originalEvent=null;}"/>
                 <f:facet name="header">
                     <h:outputText value="Cars marketplace"/>
                 </f:facet>

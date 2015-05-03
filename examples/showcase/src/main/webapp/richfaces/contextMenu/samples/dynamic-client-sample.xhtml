@@ -5,10 +5,10 @@
                 xmlns:a4j="http://richfaces.org/a4j"
                 xmlns:rich="http://richfaces.org/rich">
         <h:form id="form">
-            <rich:extendedDataTable value="#{extTableSelectionBean.inventoryItems}" var="car"
-            selection="#{extTableSelectionBean.selection}" id="table" frozenColumns="2"
-            style="height:300px; width:310px;"
-            onrowmouseup="$(document.body).data('cm-param', {'vin': '#{car.vin}', 'displayDelete': 'none'});"
+            <rich:extendedDataTable id="table" value="#{extTableSelectionBean.inventoryItems}" var="car"
+            selection="#{extTableSelectionBean.selection}" frozenColumns="2"
+            style="height:300px; width:310px;" selectionMode="single"
+            onrowmouseup="$(document.body).data('cm-param', {'model': '#{car.model}', 'vin': '#{car.vin}', 'displayDelete': '#{car.price > 50000 ? 'block' : 'none'}'});"
             onbeforeselectionchange="#{rich:component('contextMenu')}.destroy(); var cm = $('div.rf-ctx-lbl'); cm.html(RichFaces.interpolate($(document.body).data('cm-tmpl'), $(document.body).data('cm-param')));"
             onselectionchange="var cm = #{rich:component('contextMenu')}; if(event.type==cm.options.showEvent) {cm.show(event);}"
             onready="var t = #{rich:component('table')}; t.deselectRow(t.activeIndex);">
@@ -36,10 +36,12 @@
             </rich:extendedDataTable>
 
             <rich:contextMenu id="contextMenu" target="table" mode="ajax">
-                <rich:menuItem label="View {vin}" render="popupContent" oncomplete="#{rich:component('popup')}.show();"
-                               mode="ajax" icon="/images/icons/open.gif"/>
+                <rich:menuItem label="View {model}" execute="@this" render="popupContent" oncomplete="#{rich:component('popup')}.show();"
+                               icon="/images/icons/open.gif">
+                    <a4j:param name="vin" assignTo="#{extTableSelectionBean.selectedVin}" value="{vin}"/>
+                </rich:menuItem>
                 <rich:menuItem label="Delete {vin}" acton="#" render="table" style="display: {displayDelete}"
-                               mode="ajax" icon="/images/icons/delete.gif"/>
+                               icon="/images/icons/delete.gif"/>
             </rich:contextMenu>
 
         </h:form>
@@ -77,9 +79,9 @@
             <br />
             <h:button value="Close" onclick="#{rich:component('popup')}.hide(); return false;"/>
         </rich:popupPanel>
+        <!-- stores the initial contextMenu template in the body -->
         <script type="text/javascript">
             $(document).ready(function() {
-                //store the context menu template
                 var cm = $('div.rf-ctx-lbl');
                 if(cm) {
                     jQuery.data(document.body, "cm-tmpl", cm.html());

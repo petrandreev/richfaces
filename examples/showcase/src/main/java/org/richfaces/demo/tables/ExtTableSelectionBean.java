@@ -95,4 +95,13 @@ public class ExtTableSelectionBean implements Serializable {
     public void setSelectionMode(String selectionMode) {
         this.selectionMode = selectionMode;
     }
+
+    public void setSelectedVin(String vin) {
+        selectionItems.clear();
+        for (InventoryItem inventoryItem : inventoryItems) {
+            if (inventoryItem.getVin().equalsIgnoreCase(vin)) {
+                selectionItems.add(inventoryItem);
+            }
+        }
+    }
 }

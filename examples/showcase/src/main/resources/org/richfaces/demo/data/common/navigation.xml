@@ -594,6 +594,14 @@
                         <name>Table ContextMenu</name>
                     </sample>
                     <sample>
+                        <id>dynamic</id>
+                        <name>Dynamic ContextMenu</name>
+                    </sample>
+                    <sample>
+                        <id>macros</id>
+                        <name>Macros ContextMenu</name>
+                    </sample>
+                    <sample>
                         <id>tree</id>
                         <name>Tree ContextMenu</name>
                     </sample>

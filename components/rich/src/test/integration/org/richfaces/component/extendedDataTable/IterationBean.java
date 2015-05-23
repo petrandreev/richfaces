@@ -21,12 +21,13 @@
  **/
 package org.richfaces.component.extendedDataTable;
 
-import javax.enterprise.context.SessionScoped;
-import javax.inject.Named;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import javax.enterprise.context.SessionScoped;
+import javax.inject.Named;
 
 /**
  * @author <a href="http://community.jboss.org/people/bleathem">Brian Leathem</a>
@@ -96,7 +97,6 @@ public class IterationBean implements Serializable {
     }
 
     public void setNodeId(Integer nodeId) {
-        System.err.println("************ setNodeId called with: " + String.valueOf(nodeId));
         this.nodeId = nodeId;
     }
 

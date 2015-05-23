@@ -43,15 +43,12 @@ import org.jboss.arquillian.warp.jsf.Phase;
 import org.jboss.shrinkwrap.api.spec.WebArchive;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.experimental.categories.Category;
 import org.junit.runner.RunWith;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.richfaces.integration.RichDeployment;
 import org.richfaces.shrinkwrap.descriptor.FaceletAsset;
-
-import category.Failing;
 
 @RunAsClient
 @WarpTest
@@ -88,9 +85,11 @@ public class ITRowClick {
         return deployment.getFinalArchive();
     }
 
+    /**
+     *  @see <a href="https://issues.jboss.org/browse/RF-13165">RF-13165</a>
+     * @throws InterruptedException
+     */
     @Test
-    @Category(Failing.class)
-    // RF-13165
     public void row_click() throws InterruptedException {
         // given
         browser.get(contextPath.toExternalForm());
@@ -112,7 +111,7 @@ public class ITRowClick {
 
             @AfterPhase(Phase.INVOKE_APPLICATION)
             public void verify_param_assigned() {
-                Assert.assertEquals((Integer) 1, bean.getNodeId());
+                Assert.assertEquals((Integer) 5, bean.getNodeId());
             }
         });
 

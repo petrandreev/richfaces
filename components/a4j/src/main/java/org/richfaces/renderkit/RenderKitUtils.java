@@ -39,6 +39,7 @@ import javax.faces.application.Resource;
 import javax.faces.application.ResourceHandler;
 import javax.faces.component.UIComponent;
 import javax.faces.component.UIComponentBase;
+import javax.faces.component.UINamingContainer;
 import javax.faces.component.behavior.ClientBehavior;
 import javax.faces.component.behavior.ClientBehaviorContext;
 import javax.faces.component.behavior.ClientBehaviorHint;
@@ -76,8 +77,8 @@ public final class RenderKitUtils {
     private static final String ATTRIBUTES_THAT_ARE_SET = UIComponentBase.class.getName() + ".attributesThatAreSet";
     private static final String[] BOOLEAN_ATTRIBUTE_NAMES = { "checked", "compact", "declare", "defer", "disabled", "ismap",
             "multiple", "nohref", "noshade", "nowrap", "readonly", "selected" };
-    private static final String[] URI_ATTRIBUTE_NAMES = { "action", "background", "cite", "classid", "codebase", "data",
-            "href", "longdesc", "profile", "src", "usemap" };
+    private static final String[] URI_ATTRIBUTE_NAMES = { "action", "background", "cite", "classid", "codebase", "data", "href",
+            "longdesc", "profile", "src", "usemap" };
     private static final String[] XHTML_ATTRIBUTE_NAMES = { "lang" };
     private static final String DISABLED_ATTRIBUTE_NAME = "disabled";
 
@@ -273,7 +274,7 @@ public final class RenderKitUtils {
     }
 
     private static Object createBehaviorsChain(Object inlineHandlerValue, ClientBehaviorContext behaviorContext,
-            List<ClientBehavior> behaviors) {
+        List<ClientBehavior> behaviors) {
 
         boolean isChained = false;
         StringBuilder result = new StringBuilder();
@@ -354,7 +355,7 @@ public final class RenderKitUtils {
     }
 
     public static void renderAttribute(FacesContext facesContext, String attributeName, Object attributeValue)
-            throws IOException {
+        throws IOException {
 
         if (!shouldRenderAttribute(attributeValue)) {
             return;
@@ -380,7 +381,7 @@ public final class RenderKitUtils {
     // TODO - create special method for event handlers that will return String?
     // TODO - add check for 'disabled'?
     public static Object getAttributeAndBehaviorsValue(FacesContext facesContext, UIComponent component,
-            ComponentAttribute componentAttribute) {
+        ComponentAttribute componentAttribute) {
         if (facesContext == null) {
             throw new NullPointerException("facesContext");
         }
@@ -405,8 +406,8 @@ public final class RenderKitUtils {
                         List<ClientBehavior> behaviorsList = behaviorsMap.get(eventName);
                         if (!behaviorsList.isEmpty()) {
                             // TODO - parameters handling
-                            ClientBehaviorContext behaviorContext = ClientBehaviorContext.createClientBehaviorContext(
-                                    facesContext, component, eventName, null, null);
+                            ClientBehaviorContext behaviorContext = ClientBehaviorContext
+                                .createClientBehaviorContext(facesContext, component, eventName, null, null);
                             attributeValue = createBehaviorsChain(attributeValue, behaviorContext, behaviorsList);
                         }
                         break;
@@ -418,13 +419,13 @@ public final class RenderKitUtils {
     }
 
     public static void renderAttributeAndBehaviors(FacesContext facesContext, UIComponent component,
-            ComponentAttribute componentAttribute) throws IOException {
+        ComponentAttribute componentAttribute) throws IOException {
         Object attributeValue = getAttributeAndBehaviorsValue(facesContext, component, componentAttribute);
         renderAttribute(facesContext, componentAttribute.getHtmlAttributeName(), attributeValue);
     }
 
     public static void renderPassThroughAttributesOptimized(FacesContext context, UIComponent component,
-            Map<String, ComponentAttribute> knownAttributesMap) throws IOException {
+        Map<String, ComponentAttribute> knownAttributesMap) throws IOException {
 
         Object attributesThatAreSetObject = component.getAttributes().get(ATTRIBUTES_THAT_ARE_SET);
         if (attributesThatAreSetObject instanceof Collection<?>) {
@@ -467,14 +468,14 @@ public final class RenderKitUtils {
     }
 
     public static void renderPassThroughAttributes(FacesContext context, UIComponent component,
-            Map<String, ComponentAttribute> knownAttributesMap) throws IOException {
+        Map<String, ComponentAttribute> knownAttributesMap) throws IOException {
         Collection<ComponentAttribute> attributes = knownAttributesMap.values();
 
         renderPassThroughAttributes(context, component, attributes);
     }
 
     public static void renderPassThroughAttributes(FacesContext context, UIComponent component,
-            Collection<ComponentAttribute> attributes) throws IOException {
+        Collection<ComponentAttribute> attributes) throws IOException {
         boolean disabled = isDisabled(component);
         for (ComponentAttribute knownAttribute : attributes) {
             if (!disabled || knownAttribute.getEventNames().length == 0) {
@@ -505,9 +506,8 @@ public final class RenderKitUtils {
 
         List<ClientBehavior> behaviorsForEvent = behaviors.get(behaviorEvent);
         String behaviorSource = parametersMap.get(BEHAVIOR_SOURCE_ID);
-        String clientId = component.getClientId(context);
-
-        if (behaviorSource != null && behaviorSource.equals(clientId)) {
+        // RF-13165: check if the originating element id is a valid metacomponent id for the targeted component.
+        if (isValidSourceForTarget(context, component, behaviorSource)) {
             if (behaviorsForEvent != null && !behaviorsForEvent.isEmpty()) {
                 for (ClientBehavior behavior : behaviorsForEvent) {
                     behavior.decode(context, component);
@@ -518,6 +518,27 @@ public final class RenderKitUtils {
         }
 
         return null;
+    }
+
+    /**
+     * Reverts the effect of the event source &quot;re-targeting&quot; in <code>richfaces.js<code>.
+     *
+     * @param context faces context
+     * @param target a component the event is currently targeting- can be an ancestor of the source
+     * @param sourceClientId the actual component client ID firing the event
+     * @return true if the source and target equal or the source represents the descendant of the target component, false
+     *         otherwise
+     */
+    private static boolean isValidSourceForTarget(FacesContext context, UIComponent target, String sourceClientId) {
+        if (context == null || isEmpty(sourceClientId) || target == null) {
+            return false;
+        }
+        String targetClientId = target.getClientId(context);
+        if (sourceClientId.equals(targetClientId)
+            || sourceClientId.startsWith(targetClientId + UINamingContainer.getSeparatorChar(context))) {
+            return true;
+        }
+        return false;
     }
 
     public static Attributes attributes() {
@@ -595,7 +616,7 @@ public final class RenderKitUtils {
      * @since 3.3.2
      */
     public static void addToScriptHash(Map<String, Object> hash, String name, Object value, Object defaultValue,
-            ScriptHashVariableWrapper wrapper) {
+        ScriptHashVariableWrapper wrapper) {
 
         ScriptHashVariableWrapper wrapperOrDefault = wrapper != null ? wrapper : ScriptHashVariableWrapper.noop;
 
@@ -613,14 +634,14 @@ public final class RenderKitUtils {
     }
 
     public static void addToScriptHash(Map<String, Object> hash, FacesContext facesContext, UIComponent component,
-            Attributes attributes, ScriptHashVariableWrapper wrapper) {
+        Attributes attributes, ScriptHashVariableWrapper wrapper) {
 
         boolean disabled = isDisabled(component);
         for (ComponentAttribute knownAttribute : attributes) {
             if (!disabled || knownAttribute.getEventNames().length == 0) {
                 String attributeName = knownAttribute.getHtmlAttributeName();
                 addToScriptHash(hash, attributeName, getAttributeAndBehaviorsValue(facesContext, component, knownAttribute),
-                        knownAttribute.getDefaultValue(), wrapper);
+                    knownAttribute.getDefaultValue(), wrapper);
             }
         }
     }
@@ -661,8 +682,8 @@ public final class RenderKitUtils {
         String path = null;
         if (resourceName != null) {
             ResourceHandler resourceHandler = context.getApplication().getResourceHandler();
-            Resource resource = (library != null) ? resourceHandler.createResource(resourceName, library) : resourceHandler
-                    .createResource(resourceName);
+            Resource resource = (library != null) ? resourceHandler.createResource(resourceName, library)
+                : resourceHandler.createResource(resourceName);
             if (resource != null) {
                 path = resource.getRequestPath();
             }
@@ -768,8 +789,6 @@ public final class RenderKitUtils {
     public static boolean hasFacet(UIComponent component, String facetName) {
         return component.getFacet(facetName) != null && component.getFacet(facetName).isRendered();
     }
-
-
 
     /**
      * Tries to evaluate an attribute as {@link ValueExpression}. If the attribute doesn't hold {@link ValueExpression} or the
